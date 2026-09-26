@@ -75,6 +75,43 @@ def create_ship(ship: dict):
     }
 
 
+@app.put("/ships/{ship_id}")
+def update_ship(ship_id: int, ship: dict):
+    with psycopg.connect(DATABASE_URL) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE ships
+                SET
+                    latitude = %(latitude)s,
+                    longitude = %(longitude)s,
+                    speed = %(speed)s,
+                    engine_temperature = %(engine_temperature)s,
+                    fuel_level = %(fuel_level)s,
+                    engine_status = %(engine_status)s
+                WHERE id = %(ship_id)s
+                RETURNING id;
+                """,
+                {
+                    **ship,
+                    "ship_id": ship_id,
+                },
+            )
+
+            row = cursor.fetchone()
+
+        connection.commit()
+
+    if row is None:
+        return {
+            "error": "Ship not found"
+        }
+
+    return {
+        "message": "Ship telemetry updated",
+        "id": row[0],
+    }
+
 @app.get("/ships/{ship_id}")
 def get_ship(ship_id: int):
     with psycopg.connect(DATABASE_URL) as connection:
