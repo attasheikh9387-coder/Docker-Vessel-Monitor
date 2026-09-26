@@ -8,7 +8,7 @@ app = FastAPI(title="ShipTrack API")
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://shiptrack:shiptrack_dev_password@172.17.0.3:5432/shiptrack"
+    "postgresql://shiptrack:shiptrack_dev_password@172.17.0.2:5432/shiptrack",
 )
 
 
@@ -33,3 +33,127 @@ def health():
             "status": "unhealthy",
             "database": "disconnected",
         }
+
+@app.post("/ships")
+def create_ship(ship: dict):
+    with psycopg.connect(DATABASE_URL) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO ships (
+                    name,
+                    imo_number,
+                    latitude,
+                    longitude,
+                    speed,
+                    engine_temperature,
+                    fuel_level,
+                    engine_status
+                )
+                VALUES (
+                    %(name)s,
+                    %(imo_number)s,
+                    %(latitude)s,
+                    %(longitude)s,
+                    %(speed)s,
+                    %(engine_temperature)s,
+                    %(fuel_level)s,
+                    %(engine_status)s
+                )
+                RETURNING id;
+                """,
+                ship,
+            )
+
+            ship_id = cursor.fetchone()[0]
+
+        connection.commit()
+
+    return {
+        "message": "Ship created successfully",
+        "id": ship_id,
+    }
+
+
+@app.get("/ships/{ship_id}")
+def get_ship(ship_id: int):
+    with psycopg.connect(DATABASE_URL) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    imo_number,
+                    latitude,
+                    longitude,
+                    speed,
+                    engine_temperature,
+                    fuel_level,
+                    engine_status
+                FROM ships
+                WHERE id = %s;
+                """,
+                (ship_id,),
+            )
+
+            row = cursor.fetchone()
+
+    if row is None:
+        return {
+            "error": "Ship not found"
+        }
+
+    return {
+        "id": row[0],
+        "name": row[1],
+        "imo_number": row[2],
+        "latitude": row[3],
+        "longitude": row[4],
+        "speed": row[5],
+        "engine_temperature": row[6],
+        "fuel_level": row[7],
+        "engine_status": row[8],
+    }
+
+@app.get("/ships")
+def get_ships():
+    with psycopg.connect(DATABASE_URL) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    imo_number,
+                    latitude,
+                    longitude,
+                    speed,
+                    engine_temperature,
+                    fuel_level,
+                    engine_status
+                FROM ships
+                ORDER BY id;
+                """
+            )
+
+            rows = cursor.fetchall()
+
+    ships = []
+
+    for row in rows:
+        ships.append(
+            {
+                "id": row[0],
+                "name": row[1],
+                "imo_number": row[2],
+                "latitude": row[3],
+                "longitude": row[4],
+                "speed": row[5],
+                "engine_temperature": row[6],
+                "fuel_level": row[7],
+                "engine_status": row[8],
+            }
+        )
+
+    return ships 
