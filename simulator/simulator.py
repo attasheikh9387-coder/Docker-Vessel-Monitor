@@ -1,13 +1,21 @@
+import json
 import random
 import time
 
-import requests
+import redis
 
 
-API_URL = "http://localhost:8000/ships/1"
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
+
+r = redis.Redis(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    decode_responses=True,
+)
 
 ship = {
-    "name": "Atlantic Star",
+    "ship_id": 1,
     "latitude": 41.0082,
     "longitude": 28.9784,
     "speed": 18.5,
@@ -37,6 +45,7 @@ while True:
     )
 
     telemetry = {
+        "ship_id": ship["ship_id"],
         "latitude": ship["latitude"],
         "longitude": ship["longitude"],
         "speed": ship["speed"],
@@ -45,19 +54,14 @@ while True:
         "engine_status": ship["engine_status"],
     }
 
-    try:
-        response = requests.put(API_URL, json=telemetry)
+    r.lpush("telemetry", json.dumps(telemetry))
 
-        print(
-            f"Telemetry sent | "
-            f"Speed: {ship['speed']:.2f} | "
-            f"Temperature: {ship['engine_temperature']:.2f} | "
-            f"Fuel: {ship['fuel_level']:.2f} | "
-            f"Status: {response.status_code}",
-            flush=True,
-        )
-
-    except requests.RequestException as error:
-        print(f"Failed to send telemetry: {error}", flush=True)
+    print(
+        f"Telemetry queued | "
+        f"Speed: {ship['speed']:.2f} | "
+        f"Temperature: {ship['engine_temperature']:.2f} | "
+        f"Fuel: {ship['fuel_level']:.2f}",
+        flush=True,
+    )
 
     time.sleep(5)
