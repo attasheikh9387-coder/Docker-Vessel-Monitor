@@ -30,6 +30,8 @@ while True:
 
         with psycopg.connect(DATABASE_URL) as connection:
             with connection.cursor() as cursor:
+
+                # Update latest ship state
                 cursor.execute(
                     """
                     UPDATE ships
@@ -41,6 +43,31 @@ while True:
                         fuel_level = %(fuel_level)s,
                         engine_status = %(engine_status)s
                     WHERE id = %(ship_id)s;
+                    """,
+                    telemetry,
+                )
+
+                # Save telemetry history
+                cursor.execute(
+                    """
+                    INSERT INTO telemetry (
+                        ship_id,
+                        latitude,
+                        longitude,
+                        speed,
+                        engine_temperature,
+                        fuel_level,
+                        engine_status
+                    )
+                    VALUES (
+                        %(ship_id)s,
+                        %(latitude)s,
+                        %(longitude)s,
+                        %(speed)s,
+                        %(engine_temperature)s,
+                        %(fuel_level)s,
+                        %(engine_status)s
+                    );
                     """,
                     telemetry,
                 )
