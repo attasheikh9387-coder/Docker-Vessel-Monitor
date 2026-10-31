@@ -2,13 +2,24 @@ import os
 
 import psycopg
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="ShipTrack API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://192.168.1.107:5173",
+        "http://localhost:5173",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://shiptrack:shiptrack_dev_password@172.17.0.2:5432/shiptrack",
+    "postgresql://shiptrack:shiptrack_dev_password@localhost:5432/shiptrack",
 )
 
 

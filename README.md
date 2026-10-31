@@ -1,54 +1,89 @@
 # ShipTrack 🚢
 
-A production-style containerized fleet telemetry platform.
+A containerized ship fleet telemetry monitoring platform built with Docker Compose.
 
 ## Overview
 
-ShipTrack simulates a fleet of ships sending telemetry data such as:
-
-- GPS position
-- Speed
-- Engine temperature
-- Fuel level
-- Engine status
-- Timestamp
-
-The platform processes this telemetry and presents fleet information through a web-based dashboard.
+ShipTrack simulates ship telemetry, processes incoming data, stores it in PostgreSQL, and displays fleet information through a web dashboard.
 
 ## Architecture
 
-The final system will include:
-
-- React frontend
+- React + Vite frontend served by Nginx
 - FastAPI backend
-- PostgreSQL
-- Redis
-- Telemetry simulator
-- Background worker
-- Nginx reverse proxy
-- Prometheus
-- Grafana
-- Docker
-- Docker Compose
-- GitHub Actions
+- PostgreSQL database
+- Redis message queue
+- Python telemetry simulator
+- Python background worker
+- Docker and Docker Compose
 
-## Project Goals
+## Data Flow
 
-This project is designed to demonstrate practical knowledge of:
+1. Simulator generates ship telemetry.
+2. Redis queues incoming messages.
+3. Worker consumes messages from Redis.
+4. Worker saves telemetry into PostgreSQL.
+5. FastAPI provides ship data through REST API endpoints.
+6. Frontend displays ship information.
 
-- Docker
-- Docker Compose
-- Container networking
+## Docker Services
+
+| Service | Purpose |
+|---|---|
+| Frontend | Web dashboard |
+| API | Backend REST API |
+| PostgreSQL | Persistent database |
+| Redis | Message queue |
+| Worker | Telemetry processing |
+| Simulator | Telemetry generation |
+
+## Getting Started
+
+Clone the repository:
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd shiptrack
+Start the application:
+
+docker compose up -d --build
+
+Check services:
+
+docker compose ps
+
+View logs:
+
+docker compose logs -f
+
+Stop the application:
+
+docker compose down
+
+## Application URLs
+
+- Frontend: http://localhost:5173
+- API: http://localhost:8000
+- Health: http://localhost:8000/health
+- Ship data: http://localhost:8000/ships
+
+## Docker Concepts Demonstrated
+
+- Multi-container orchestration
+- Docker networking
 - Persistent volumes
 - Health checks
-- Service discovery
-- Environment configuration
-- Container security
-- Logging
-- Monitoring
-- Failure recovery
-- CI/CD
+- Environment variables
+- Containerized frontend builds
+- Background processing
+- Redis messaging
 
-## Status
+## Project Status
 
-🚧 Phase 1 — Project initialization
+Core application and Docker Compose deployment completed.
+
+## Future Improvements
+
+- Prometheus and Grafana monitoring
+- GitHub Actions CI/CD
+- Automated testing
+- Production security hardening

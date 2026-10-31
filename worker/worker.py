@@ -1,3 +1,4 @@
+import os
 import json
 import time
 
@@ -5,12 +6,12 @@ import psycopg
 import redis
 
 
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 
-DATABASE_URL = (
-    "postgresql://shiptrack:shiptrack_dev_password"
-    "@172.17.0.3:5432/shiptrack"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://shiptrack:shiptrack_dev_password@localhost:5432/shiptrack",
 )
 
 r = redis.Redis(
