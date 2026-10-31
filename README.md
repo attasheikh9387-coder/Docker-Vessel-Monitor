@@ -43,21 +43,31 @@ Clone the repository:
 ```bash
 git clone YOUR_GITHUB_REPOSITORY_URL
 cd shiptrack
+```
+
 Start the application:
 
+```bash
 docker compose up -d --build
+```
 
 Check services:
 
+```bash
 docker compose ps
+```
 
 View logs:
 
+```bash
 docker compose logs -f
+```
 
 Stop the application:
 
+```bash
 docker compose down
+```
 
 ## Application URLs
 
